@@ -8,12 +8,17 @@ export const pool = new Pool({
   }
 });
 
-pool.connect()
-  .then(client => {
+(async () =>
+{
+  try
+  {
+    const client = await pool.connect();
     console.log("DATABASE CONNECTED");
     client.release();
-  })
-  .catch(err => {
+  }
+  catch (err)
+  {
     console.error("DATABASE CONNECTION FAILED");
     console.error(err);
-  });
+  }
+})();
