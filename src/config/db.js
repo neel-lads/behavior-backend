@@ -7,3 +7,13 @@ export const pool = new Pool({
     rejectUnauthorized: false
   }
 });
+
+pool.connect()
+  .then(client => {
+    console.log("DATABASE CONNECTED");
+    client.release();
+  })
+  .catch(err => {
+    console.error("DATABASE CONNECTION FAILED");
+    console.error(err);
+  });
