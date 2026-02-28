@@ -1,10 +1,9 @@
-import express from 'express';
-import { authenticate } from '../middleware/auth.js';
-import { getAnalytics } from '../controllers/analyticsController.js';
+import express from "express";
+import { authenticate } from "../middleware/authMiddleware.js";
+import { getAnalytics } from "../controllers/analyticsController.js";
 
 const router = express.Router();
 
-router.get('/', authenticate, getAnalytics);
+router.get("/analytics", authenticate, getAnalytics);
 
 export default router;
-router.get('/cluster', authenticate, clusterAnalysis);
