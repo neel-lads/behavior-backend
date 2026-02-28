@@ -26,10 +26,11 @@ export const kMeans = (data, k = 3, iterations = 10) =>
 
     centroids = clusters.map(cluster =>
     {
-      const mean = cluster[0].map((_, i) =>
+      if (cluster.length === 0) return centroids[0];
+
+      return cluster[0].map((_, i) =>
         cluster.reduce((sum,p)=>sum+p[i],0)/cluster.length
       );
-      return mean;
     });
   }
 
@@ -41,10 +42,4 @@ const euclidean = (a,b) =>
   return Math.sqrt(
     a.reduce((sum,val,i)=>sum+Math.pow(val-b[i],2),0)
   );
-};
-import { kMeans } from './clustering.js';
-
-export const clusterSessions = (featureVectors) =>
-{
-  return kMeans(featureVectors, 3, 15);
 };
