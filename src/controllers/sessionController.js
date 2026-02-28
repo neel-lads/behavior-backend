@@ -23,13 +23,25 @@ export const createSession = async (req,res) =>
 
 export const logEvent = async (req,res) =>
 {
-  const { sessionId, type, element, duration, extra } = req.body;
+  try
+  {
+    const { sessionId, type, element, duration, extra } = req.body;
 
-  await pool.query(
-    `INSERT INTO events(session_id,type,element,timestamp,duration,extra)
-     VALUES($1,$2,$3,NOW(),$4,$5)`,
-    [sessionId,type,element,duration,extra]
-  );
+    await pool.query(
+      `INSERT INTO events(session_id,event_type,metadata)
+       VALUES($1,$2,$3)`,
+      [
+        sessionId,
+        type,
+        JSON.stringify({ element, duration, extra })
+      ]
+    );
 
-  res.json({ message:"Event logged" });
+    res.json({ message:"Event logged" });
+  }
+  catch(err)
+  {
+    console.error("LOG EVENT ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
 };
