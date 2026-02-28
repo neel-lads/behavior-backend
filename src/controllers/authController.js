@@ -4,15 +4,27 @@ import { pool } from '../config/db.js';
 
 export const register = async (req, res) =>
 {
-  const { name, email, password, role } = req.body;
-  const hashed = await bcrypt.hash(password, 10);
+  try
+  {
+    const { name, email, password, role } = req.body;
 
-  await pool.query(
-    "INSERT INTO users(name,email,password,role) VALUES($1,$2,$3,$4)",
-    [name,email,hashed,role]
-  );
+    if (!name || !email || !password || !role)
+      return res.status(400).json({ message: "All fields required" });
 
-  res.json({ message: "User registered" });
+    const hashed = await bcrypt.hash(password, 10);
+
+    await pool.query(
+      "INSERT INTO users(name,email,password,role) VALUES($1,$2,$3,$4)",
+      [name,email,hashed,role]
+    );
+
+    res.json({ message: "User registered" });
+  }
+  catch (err)
+  {
+    console.error("REGISTER ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 export const login = async (req,res) =>
