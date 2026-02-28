@@ -43,3 +43,8 @@ const euclidean = (a,b) =>
     a.reduce((sum,val,i)=>sum+Math.pow(val-b[i],2),0)
   );
 };
+
+export const clusterSessions = (featureVectors) =>
+{
+  return kMeans(featureVectors, 3, 15);
+};
