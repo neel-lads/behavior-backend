@@ -2,7 +2,7 @@ import { pool } from "../config/db.js";
 import { buildFeatureVector } from "../analytics/featureExtractor.js";
 import { clusterSessions } from "../analytics/clustering.js";
 
-export const getSummary = async (req, res) =>
+export const getAnalytics = async (req, res) =>
 {
   const sessions = await pool.query("SELECT id FROM sessions");
 
