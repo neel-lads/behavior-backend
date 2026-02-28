@@ -2,15 +2,23 @@ import { pool } from '../config/db.js';
 
 export const createSession = async (req,res) =>
 {
-  const { sessionId, phase } = req.body;
+  try
+  {
+    const { sessionId, phase } = req.body;
 
-  await pool.query(
-    `INSERT INTO sessions(id,user_id,phase,started_at)
-     VALUES($1,$2,$3,NOW())`,
-    [sessionId, req.user.id, phase]
-  );
+    await pool.query(
+      `INSERT INTO sessions(session_id,user_id,phase)
+       VALUES($1,$2,$3)`,
+      [sessionId, req.user.id, phase]
+    );
 
-  res.json({ message:"Session created" });
+    res.json({ message:"Session created" });
+  }
+  catch(err)
+  {
+    console.error("CREATE SESSION ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
 };
 
 export const logEvent = async (req,res) =>
