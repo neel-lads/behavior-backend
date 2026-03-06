@@ -1,39 +1,36 @@
-import { pathEntropy } from './entropy.js';
-
 export const buildFeatureVector = (events) =>
 {
   let clicks = 0;
-  let scrollValues = [];
-  let dwellTimes = [];
+  let transitions = 0;
+  let hovers = 0;
+  let scrolls = 0;
   let errors = 0;
-  let paths = [];
 
-  events.forEach(e =>
+  for (const e of events)
   {
-    if (e.type === "click") clicks++;
-    if (e.type === "scroll_depth") scrollValues.push(e.extra?.scrollPercent || 0);
-    if (e.type === "dwell_time") dwellTimes.push(e.duration || 0);
-    if (e.type === "error_event") errors++;
-    if (e.type === "click") paths.push(e.element);
-  });
+    const type = e.event_type;   // correct column
 
-  const avgScroll =
-    scrollValues.length > 0
-      ? scrollValues.reduce((a,b)=>a+b,0)/scrollValues.length
-      : 0;
+    if (type === "click")
+      clicks++;
 
-  const avgDwell =
-    dwellTimes.length > 0
-      ? dwellTimes.reduce((a,b)=>a+b,0)/dwellTimes.length
-      : 0;
+    else if (type === "frame_transition")
+      transitions++;
 
-  const entropy = pathEntropy(paths);
+    else if (type === "hover")
+      hovers++;
+
+    else if (type === "scroll")
+      scrolls++;
+
+    else if (type === "error")
+      errors++;
+  }
 
   return [
     clicks,
-    avgScroll,
-    avgDwell,
-    errors,
-    entropy
+    transitions,
+    hovers,
+    scrolls,
+    errors
   ];
 };
