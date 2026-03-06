@@ -4,34 +4,78 @@ import { clusterSessions } from "../analytics/clustering.js";
 
 export const getAnalytics = async (req,res)=>
 {
-  const sessions =
-    await pool.query("SELECT session_id, phase FROM sessions");
-
-  let featureVectors = [];
-
-  for (let s of sessions.rows)
+  try
   {
-    const events =
+    const sessions =
       await pool.query(
-        "SELECT * FROM events WHERE session_id=$1",
-        [s.session_id]
+        "SELECT session_id, phase FROM sessions"
       );
 
-    const vector = buildFeatureVector(events.rows);
+    let featureVectors = [];
+    let prototypeVectors = [];
+    let deployedVectors = [];
 
-    featureVectors.push({
-      session_id: s.session_id,
-      phase: s.phase,
-      vector
+    for(const s of sessions.rows)
+    {
+      const events =
+        await pool.query(
+          "SELECT event_type FROM events WHERE session_id=$1",
+          [s.session_id]
+        );
+
+      const vector =
+        buildFeatureVector(events.rows);
+
+      featureVectors.push(vector);
+
+      if(s.phase === "prototype")
+        prototypeVectors.push(vector);
+
+      if(s.phase === "deployed")
+        deployedVectors.push(vector);
+    }
+
+    const clusters =
+      clusterSessions(featureVectors);
+
+    const avg = (arr)=>
+    {
+      if(arr.length === 0) return [0,0,0,0,0];
+
+      let sum=[0,0,0,0,0];
+
+      for(const v of arr)
+      {
+        for(let i=0;i<5;i++)
+          sum[i]+=v[i];
+      }
+
+      return sum.map(v=>v/arr.length);
+    };
+
+    const protoAvg = avg(prototypeVectors);
+    const deployAvg = avg(deployedVectors);
+
+    let divergence = 0;
+
+    for(let i=0;i<5;i++)
+    {
+      divergence += Math.abs(protoAvg[i]-deployAvg[i]);
+    }
+
+    res.json({
+      sessions: sessions.rows.length,
+      featureVectors,
+      clusters,
+      prototypeAvg: protoAvg,
+      deployedAvg: deployAvg,
+      divergence
     });
+
   }
-
-  const clusters = clusterSessions(
-    featureVectors.map(v => v.vector)
-  );
-
-  res.json({
-    sessions: featureVectors.length,
-    clusters
-  });
+  catch(err)
+  {
+    console.error(err);
+    res.status(500).json({error:err.message});
+  }
 };
