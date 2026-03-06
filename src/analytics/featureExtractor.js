@@ -6,24 +6,32 @@ export const buildFeatureVector = (events) =>
   let scrolls = 0;
   let errors = 0;
 
-  for (const e of events)
+  for (const event of events)
   {
-    const type = e.event_type;   // correct column
+    const type = event.event_type;   // IMPORTANT
+
+    if (!type) continue;
 
     if (type === "click")
+    {
       clicks++;
-
+    }
     else if (type === "frame_transition")
+    {
       transitions++;
-
+    }
     else if (type === "hover")
+    {
       hovers++;
-
+    }
     else if (type === "scroll")
+    {
       scrolls++;
-
+    }
     else if (type === "error")
+    {
       errors++;
+    }
   }
 
   return [
