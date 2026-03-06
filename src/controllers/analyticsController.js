@@ -4,17 +4,13 @@ import { clusterSessions } from "../analytics/clustering.js";
 
 export const getAnalytics = async (req, res) =>
 {
-  const sessions = await pool.query("SELECT id FROM sessions");
+  const sessions = await pool.query("SELECT session_id FROM sessions");
 
   let featureVectors = [];
 
   for (let s of sessions.rows)
   {
-    const events =
-      await pool.query(
-        "SELECT * FROM events WHERE session_id=$1",
-        [s.id]
-      );
+    const events = await pool.query("SELECT * FROM events WHERE session_id=$1",[s.session_id]);
 
     const vector = buildFeatureVector(events.rows);
     featureVectors.push(vector);
